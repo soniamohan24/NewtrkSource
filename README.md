@@ -1,4 +1,4 @@
-CI/CD Pipeline with Terraform, Ansible, Docker, and GitHub Actions
+Automated Container deployment and Administration in the cloud
 
 This project sets up a CI/CD pipeline to automate deploying a containerized application on AWS EC2. The process includes provisioning infrastructure with Terraform, configuring the server with Ansible, deploying a Docker container, and automating the workflow with GitHub Actions.
 
