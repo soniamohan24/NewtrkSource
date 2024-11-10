@@ -1,0 +1,66 @@
+- name: Commit and Push Changes to GitHub, Build Docker Image, and Run Container
+  hosts: localhost
+  become: yes
+  vars:
+    github_repo_url: "https://github.com/soniamohan24/siansiansaWebServer.git"
+    local_repo_path: "/Users/soniamohan/sansia-awsproject/siansaWebServer"
+    git_commit_message: "Updated version of code"
+    github_username: "soniamohan24"
+    gtoken: "{{ lookup('env', 'GITHUB_TOKEN') }}"  # Use the environment variable for the token
+  tasks:
+    # Step 1: Check for uncommitted changes in the repository
+    - name: Check for uncommitted changes in the repository
+      command: git -C "{{ local_repo_path }}" status --porcelain
+      register: git_status
+      changed_when: false
+
+    # Step 2: Add changes to Git staging area if there are any uncommitted changes
+    - name: Add changes to Git staging area
+      command: git -C "{{ local_repo_path }}" add .
+      when: git_status.stdout != ""
+
+    # Step 3: Commit changes with a message
+    - name: Commit changes with a message
+      command: git -C "{{ local_repo_path }}" commit -m "{{ git_commit_message }}"
+      when: git_status.stdout != ""
+
+    # Step 4: Push changes to GitHub repository
+    - name: Push changes to GitHub repository
+      command: >
+        git -C "{{ local_repo_path }}" push
+        https://{{ github_username }}:{{ gtoken }}@github.com/soniamohan24/siansiansaWebServer.git HEAD:main
+      when: git_status.stdout != ""
+   
+    # Step 5: Print message if no changes to commit
+    - name: Print message if no changes to commit
+      debug:
+        msg: "No changes to commit."
+      when: git_status.stdout == ""
+
+    # Step 6: Start Docker service only on Linux
+    - name: Start Docker service on Linux
+      service:
+        name: docker
+        state: started
+        enabled: yes
+      when: ansible_facts['os_family'] == 'Linux'
+
+    # Step 7: Build Docker image from the repository
+    - name: Build Docker image from the repository
+      docker_image:
+        source: build
+        name: siansawebserver-image
+        tag: latest
+        build:
+          path: "{{ local_repo_path }}"
+          dockerfile: Dockerfile
+
+    # Step 8: Run Docker container
+    - name: Run Docker container
+      docker_container:
+        name: siansawebserver-container
+        image: siansawebserver-image:latest
+        state: started
+        ports:
+          - "8080:8080"
+        restart_policy: always

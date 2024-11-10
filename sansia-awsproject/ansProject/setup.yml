@@ -1,0 +1,79 @@
+---
+- name: Setup Server, Install Docker, Clone Repo, and Run Container
+  hosts: all
+  become: yes
+  vars:
+    github_repo_url: "https://github.com/soniamohan24/siansiansaWebServer.git"
+
+  tasks:
+    # Step 1: Update apt and install dependencies
+    - name: Update apt repository
+      apt:
+        update_cache: yes
+
+    - name: Install Docker, Git, and Python dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - docker.io
+        - git
+        - python3-pip
+
+    - name: Add user to docker group
+      user:
+        name: ubuntu  # Adjust to target user
+        groups: docker
+        append: yes
+
+    # Step 2: Clone GitHub Repository
+    - name: Ensure .ssh directory exists for GitHub access
+      file:
+        path: "/home/ubuntu/.ssh"
+        state: directory
+        mode: '0700'
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Add GitHub to known hosts
+      shell: ssh-keyscan github.com >> /home/ubuntu/.ssh/known_hosts
+      args:
+        creates: /home/ubuntu/.ssh/known_hosts
+   
+
+    - name: Clone the GitHub repository
+      git:
+        repo: "{{ github_repo_url }}"
+        dest: /home/ubuntu/siansaWebServer
+        update: yes
+        clone: yes  # Ensures the repo is cloned if it's not already present
+        version: main  # Optional: you can specify a branch, tag, or commit if you don't want the default branch
+        force: yes  # Optional: forces the clone even if the repo already exists (be careful with this)
+      become: yes  # Optional: Use become if you need elevated privileges (sudo)
+      become_user: ubuntu  # Optional: Specify the user (e.g., 'ubuntu' user in AWS EC2)
+
+    # Step 3: Start Docker service and ensure it starts on boot
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    # Step 4: Build and Run Docker Container
+    - name: Build Docker image from the repository
+      docker_image:
+        source: build
+        name: siansawebserver-image
+        tag: latest
+        build:
+          path: /home/ubuntu/siansaWebServer
+          dockerfile: Dockerfile
+
+    - name: Run Docker container
+      docker_container:
+        name: siansawebserver-container
+        image: siansawebserver-image:latest
+        state: started
+        ports:
+          - "8080:8080"
+        restart_policy: always
