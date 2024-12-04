@@ -23,3 +23,9 @@ main.tf (Terraform), setup-docker.yml (Ansible), Dockerfile, ci-cd-pipeline.yml
 
 Source with CI/CD Piplene can be found in the following git repo
 https://github.com/soniamohan24/siansiansaWebServer.git
+
+AWS Deployment Demo
+https://drive.google.com/file/d/1GqvGy62bkhaPfCgA08XFKPqe9uFvPKCV/view?usp=sharing
+
+Demo Video using Azure is given in thelink below
+https://mydbs-my.sharepoint.com/:v:/g/personal/20049582_mydbs_ie/ESqKUyTzdmZFqkPhmA6-6YgBRWUVR8JK7_p-nRT5-wRqWA?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=XKrEik
